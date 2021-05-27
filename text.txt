@@ -1,0 +1,23 @@
+Estudo de Regexp
+
+TAGS:
+
+g - significa global, procura todos os possiveis resultados em um texto
+i - intensive, ignora letras maiscula ou minusculas
+( ) - buscar mais de um grupo
+| - ou 
+
+metodos para obtenção de resultados
+
+varname.test()
+varnme.exp()
+varname.math()
+varname.replace()
+
+QUANTIFICADORES 
+
+* - 0 ou N vezes
++ - 1 ou N vezes
+? - 0 ou 1 vezes
+\ - caracter de escape
+{minimo,maximo} - especifica quantidade

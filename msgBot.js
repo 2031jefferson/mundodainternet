@@ -1,15 +1,20 @@
 
 const fs = require('fs-extra')
+const {decryptFile } = require('venom-bot')
+const http = require('http')
+const axios = require('axios')
 const { index } = require('mathjs')
 const banned = JSON.parse(fs.readFileSync('./settings/banned.json'))
 const simi = JSON.parse(fs.readFileSync('./settings/simi.json'))
 const ngegas = JSON.parse(fs.readFileSync('./settings/ngegas.json'))
 const setting = JSON.parse(fs.readFileSync('./settings/setting.json'))
 const prem = JSON.parse(fs.readFileSync('./lib/database/prem.json'))
+const json = require('./lib/json.js')
 
 //Variaveis referente a FS-EXTRA
 let vip = JSON.parse(fs.readFileSync('./cadastro/vip.json'))
-
+let cadastrar = JSON.parse(fs.readFileSync('./cadastro/cadastro.json'))
+let cadastrarUserName = JSON.parse(fs.readFileSync('./cadastro/username.json'))
 
 let { 
     ownerNumber, 
@@ -92,12 +97,31 @@ module.exports = msgBot = async (client, message) => {
         const isPrem = prem.includes(pengirim)
         var nomegrupo = name
 
+        const mess = {
+            wait: '[ wait ], em andamento jovem'
+        }
+
         client.onAddedToGroup((chat) => {
             client.sendText(chat.id, 'Ola amigo')
         })
+        var regExp1 = /(Http:\/\/)|(Https:\/\/)|(\.com)/gi
+        var status = regExp1.test(message.body)
+        if(status == true){
+            client.reply(from, `Link detectado`, id)
+        }
 
 
         switch(command){
+            case 'wallpaper':
+                client.reply(from, mess.wait, id);
+                axios.get('https://akaneko-api.herokuapp.com/api/mobileWallpapers').then(res => {
+                    client.sendFileFromBase64(from, res.data.url, 'Desktop Wallpaper.jpeg', 'Enjoy :>', id);
+                });
+                break
+            case 'cadastrar':
+                if(verificarCadastros() == true) return client.reply(from, `voce ja esta no sistema.`, id)
+                cadastrarUser(args[0])
+                break;
             case 'admin':
                 console.log(isAdminGrupo())
                 if(isAdminGrupo() == false) return client.reply(from, `^-^ *${pushname}* Você não é Adminstrador(a)`, id)
@@ -244,6 +268,22 @@ BOT JHEFFER:
         }
         return resultt;
     }
+    function verificarCadastros(){
+        for(let i = 0; i < cadastrar.length; i++){
+            if(idUsuario() == cadastrar[i]){
+                return true
+            }
+        }
+    }
+    function cadastrarUser(args0){
+        cadastrar.push(json.cadastro(idUsuario(), args0, pushname))
+        fs.writeFileSync('./cadastro/id.js', JSON.stringify(cadastrar))
+        
+        cadastrarUserName.push(args0)
+        fs.writeFileSync('./cadastro/username.js', JSON.stringify(cadastrarUserName))
+        client.reply(from, `${pushname}, você cadastrou seu contato no sistema com o user-Name *${args0}*`)
+
+    }
     function cadastrandoVip(){
         if(isGroupMsg){
             vip.push(author)
@@ -255,6 +295,15 @@ BOT JHEFFER:
             client.reply(from, '_- Ok, Cadastro efetuado com sucesso..._', id)
         }
     }
+    function urlify(text) {
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, function(url) {
+          return '<a href="' + url + '">' + url + '</a>';
+        })
+        // or alternatively
+        // return text.replace(urlRegex, '<a href="$1">$1</a>')
+      }
+      
 
     }catch(err){
         console.log('[ERROR]', err)
